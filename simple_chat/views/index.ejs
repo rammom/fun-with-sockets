@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<link rel='stylesheet' href='/stylesheets/style.css' />
+		<script
+  src="https://code.jquery.com/jquery-3.3.1.min.js"
+  integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+  crossorigin="anonymous"></script>
+  		<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.1.1/socket.io.js"></script>
+	</head>
+	<body>
+		<h1>The chat room.</h1>
+		<div style="border: 1px solid black; height: 70vh; overflow-y: scroll; overflow-x: normal" id="chat-box">
+			<% messages.forEach(function(message){ %>
+				<p><b style='color: green;'><%= message.alias %>: </b><%= message.message %></p>
+			<% }); %>
+		</div>
+		<div style="position:absolute;bottom:5vh;right: 2vw;">
+			<label>Alias:</label>
+			<input type="text" name="name" id="alias">
+		</div>
+		<div style="position:absolute;bottom:2vh;right: 2vw;">
+			<label>Message:</label>
+			<input type="text" name="message" id="message">
+			<button id="send-message">send</button>
+		</div>
+	</body>
+</html>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+
+		var socket = io.connect('localhost:3000');
+
+		socket.on('send-message', function(data){
+			console.log("update:"+ data);
+			var string = "<p><b style='color: green;'>"+data.alias+": </b>"+data.message+"</p>"
+			$("#chat-box").append(string);
+		});
+
+		$("#send-message").on('click', function(){
+			if ($("#alias").val() == "" || $("#message").val() == "")
+				return;
+			var string = "<p><b style='color: green;'>"+$("#alias").val()+": </b>"+$("#message").val()+"</p>"
+			$("#chat-box").append(string);
+			socket.emit('send-message', {alias: $("#alias").val(), message: $("#message").val()});
+			$("#message").val("");
+		});
+	});
+</script>
